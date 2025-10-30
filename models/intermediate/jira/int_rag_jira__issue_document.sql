@@ -7,48 +7,48 @@ with issues as (
         {% if var('jira_subdomain', default=None) %}
         ,'{{ var("jira_subdomain") }}' as jira_subdomain_value
         {% endif %}
-    from {{ ref('stg_rag_jira__issue') }}
+    from {{ ref('unified_rag','stg_rag_jira__issue') }}
 ), 
 
 users as (
 
     select *
-    from {{ ref('stg_rag_jira__user') }}
+    from {{ ref('unified_rag','stg_rag_jira__user') }}
 ), 
 
 {% if var('rag_jira_using_priorities', True) %}
 priorities as (
 
     select *
-    from {{ ref('stg_rag_jira__priority') }}
+    from {{ ref('unified_rag','stg_rag_jira__priority') }}
 ),
 {% endif %}
 
 statuses as (
 
     select *
-    from {{ ref('stg_rag_jira__status') }}
+    from {{ ref('unified_rag','stg_rag_jira__status') }}
 ),
 
 issue_details as (
 
     select
         issues.issue_id,
-        {{ unified_rag.coalesce_cast(["issues.title", "'UNKNOWN'"], dbt.type_string()) }} as title,
+        {{ fivetran_demo_downstream.coalesce_cast(["issues.title", "'UNKNOWN'"], dbt.type_string()) }} as title,
         {% if var('jira_subdomain', default=None) %}
             {{ dbt.concat(["'https://'", "jira_subdomain_value", "'.atlassian.net/browse/'", "issues.issue_key"]) }} as url_reference,
         {% else %}
             cast(null as {{ dbt.type_string() }}) as url_reference,
         {% endif %}
         issues.source_relation,
-        {{ unified_rag.coalesce_cast(["users.user_display_name", "'UNKNOWN'"], dbt.type_string()) }} as user_name,
-        {{ unified_rag.coalesce_cast(["users.email", "'UNKNOWN'"], dbt.type_string()) }} as created_by,
-        {{ unified_rag.coalesce_cast(["issues.created_at", "'1970-01-01 00:00:00'"], dbt.type_timestamp()) }} as created_on,
-        {{ unified_rag.coalesce_cast(["statuses.status_name", "issues.status_id", "'UNKNOWN'"], dbt.type_string()) }} as status,
+        {{ fivetran_demo_downstream.coalesce_cast(["users.user_display_name", "'UNKNOWN'"], dbt.type_string()) }} as user_name,
+        {{ fivetran_demo_downstream.coalesce_cast(["users.email", "'UNKNOWN'"], dbt.type_string()) }} as created_by,
+        {{ fivetran_demo_downstream.coalesce_cast(["issues.created_at", "'1970-01-01 00:00:00'"], dbt.type_timestamp()) }} as created_on,
+        {{ fivetran_demo_downstream.coalesce_cast(["statuses.status_name", "issues.status_id", "'UNKNOWN'"], dbt.type_string()) }} as status,
         {% if var('jira_using_priorities', True) %}
-            {{ unified_rag.coalesce_cast(["priorities.priority_name", "issues.priority_id", "'UNKNOWN'"], dbt.type_string()) }} as priority
+            {{ fivetran_demo_downstream.coalesce_cast(["priorities.priority_name", "issues.priority_id", "'UNKNOWN'"], dbt.type_string()) }} as priority
         {% else %}
-            {{ unified_rag.coalesce_cast(["issues.priority_id", "'UNKNOWN'"], dbt.type_string()) }} as priority
+            {{ fivetran_demo_downstream.coalesce_cast(["issues.priority_id", "'UNKNOWN'"], dbt.type_string()) }} as priority
         {% endif %}
     from issues
     left join users
@@ -82,5 +82,5 @@ final as (
 
 select 
     *,
-    {{ unified_rag.count_tokens("issue_markdown") }} as issue_tokens
+    {{ fivetran_demo_downstream.count_tokens("issue_markdown") }} as issue_tokens
 from final

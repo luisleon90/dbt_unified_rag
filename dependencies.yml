@@ -1,0 +1,2 @@
+projects:
+  - name: unified_rag  # case sensitive and matches the 'name' in the 'dbt_project.yml'

@@ -3,13 +3,13 @@
 with issue_comments as (
 
     select *
-    from {{ ref('stg_rag_jira__comment') }}
+    from {{ ref('unified_rag','stg_rag_jira__comment') }}
 ),
 
 users as ( 
 
     select *
-    from {{ ref('stg_rag_jira__user') }}
+    from {{ ref('unified_rag','stg_rag_jira__user') }}
 ),
 
 comment_details as (
@@ -18,10 +18,10 @@ comment_details as (
         issue_comments.comment_id as issue_comment_id,
         issue_comments.issue_id,
         issue_comments.source_relation,
-        {{ unified_rag.coalesce_cast(["users.email", "'UNKNOWN'"], dbt.type_string()) }} as commenter_email,
-        {{ unified_rag.coalesce_cast(["users.user_display_name", "'UNKNOWN'"], dbt.type_string()) }} as commenter_name,
-        {{ unified_rag.coalesce_cast(["issue_comments.created_at", "'1970-01-01 00:00:00'"], dbt.type_timestamp()) }} as comment_time,
-        {{ unified_rag.coalesce_cast(["issue_comments.body", "'UNKNOWN'"], dbt.type_string()) }} as comment_body
+        {{ fivetran_demo_downstream.coalesce_cast(["users.email", "'UNKNOWN'"], dbt.type_string()) }} as commenter_email,
+        {{ fivetran_demo_downstream.coalesce_cast(["users.user_display_name", "'UNKNOWN'"], dbt.type_string()) }} as commenter_name,
+        {{ fivetran_demo_downstream.coalesce_cast(["issue_comments.created_at", "'1970-01-01 00:00:00'"], dbt.type_timestamp()) }} as comment_time,
+        {{ fivetran_demo_downstream.coalesce_cast(["issue_comments.body", "'UNKNOWN'"], dbt.type_string()) }} as comment_body
     from issue_comments
     left join users
         on issue_comments.author_user_id = users.user_id
@@ -48,7 +48,7 @@ comments_tokens as (
 
     select
         *,
-        {{ unified_rag.count_tokens("comment_markdown") }} as comment_tokens
+        {{ fivetran_demo_downstream.count_tokens("comment_markdown") }} as comment_tokens
     from comment_markdowns
 ),
 

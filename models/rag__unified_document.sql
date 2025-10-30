@@ -1,6 +1,6 @@
 {{
     config(
-        materialized='table' if unified_rag.is_databricks_sql_warehouse() else 'incremental',
+        materialized='table' if fivetran_demo_downstream.is_databricks_sql_warehouse() else 'incremental',
         partition_by = {'field': 'update_date', 'data_type': 'date'}
             if target.type not in ['spark', 'databricks'] else ['update_date'],
         cluster_by = ['update_date'],

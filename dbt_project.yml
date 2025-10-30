@@ -1,11 +1,11 @@
 config-version: 2
 require-dbt-version: [">=1.3.0", "<2.0.0"]
 
-name: 'unified_rag'
+name: 'fivetran_demo_downstream'
 version: '0.1.0'
 
 vars:
-  unified_rag:
+  fivetran_demo_downstream:
     ## Zendesk Sources
     zendesk_ticket: "{{ source('rag_zendesk', 'ticket') }}"
     zendesk_ticket_comment: "{{ source('rag_zendesk', 'ticket_comment') }}"
@@ -32,12 +32,13 @@ vars:
 
     
 models:
-  unified_rag:
+  dbt_unified_rag:
     +schema: unified_rag
     intermediate:
       +materialized: ephemeral
     unstructured:
       +materialized: view
     staging:
+      +enabled: false
       +materialized: view
       +schema: unified_rag_source
