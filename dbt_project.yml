@@ -30,14 +30,30 @@ vars:
     hubspot_deal: "{{ source('rag_hubspot', 'deal') }}"
     hubspot_owner: "{{ source('rag_hubspot', 'owner') }}"
 
-    
+  rag_hubspot_schema: support_data_hubspot
+  rag_hubspot_database: AwsDataCatalog
+  rag_jira_schema: support_data_jira
+  rag_jira_database: AwsDataCatalog
+  rag_zendesk_schema: support_data_zendesk
+  rag_zendesk_database: AwsDataCatalog
+
+dispatch:
+  - macro_namespace: dbt_utils
+    search_order: ['spark_utils', 'dbt_utils']
+
 models:
   unified_rag:
     +schema: unified_rag
     intermediate:
+      +enabled: false
       +materialized: ephemeral
     unstructured:
+      +enabled: false
       +materialized: view
     staging:
-      +materialized: view
+      +access: public
+      +materialized: table
+      +table_type: iceberg
+      +format: parquet
+      +is_external: false
       +schema: unified_rag_source
